@@ -1,0 +1,11 @@
+{
+  "name": "persnickety",
+  "version": "1.0.0",
+  "description": "Open Api Spec generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Miika Henttonen miika.henttonen@gmail.com",
+  "license": "MIT"
+}
