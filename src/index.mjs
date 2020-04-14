@@ -1,22 +1,22 @@
 let schema;
 
 const Persnickety = (schemaSkeleton) => {
-  schema = schemaSkeleton
+  schema = schemaSkeleton;
 
   return {
-    getSchema: () => schema
-  }
-}
+    getSchema: () => schema,
+  };
+};
 
 export const Route = (path) => {
   schema = {
     ...schema,
     paths: {
       ...schema.paths,
-      ...path
-    }
-  }
-}
+      ...path,
+    },
+  };
+};
 
 export const Model = (model) => {
   schema = {
@@ -24,10 +24,10 @@ export const Model = (model) => {
     components: {
       schemas: {
         ...(schema.components && schema.components.schemas),
-        ...model
-      }
-    }
-  }
-}
+        ...model,
+      },
+    },
+  };
+};
 
-export default Persnickety
+export default Persnickety;

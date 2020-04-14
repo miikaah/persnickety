@@ -13,7 +13,7 @@
     "*.{js,jsx,ts,tsx}": [
       "npm run lint"
     ],
-    "*.{js,jsx,ts,tsx,json,md}": [
+    "*.{mjs,js,jsx,ts,tsx,json,md}": [
       "prettier --write"
     ]
   },
