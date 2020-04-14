@@ -8,12 +8,15 @@ const Persnickety = (schemaSkeleton) => {
   };
 };
 
-export const Route = (path) => {
+export const Route = (path, pathSchema) => {
   schema = {
     ...schema,
     paths: {
       ...schema.paths,
-      ...path,
+      [path]: {
+        ...(schema.paths && schema.paths[path]),
+        ...pathSchema,
+      },
     },
   };
 };
@@ -22,6 +25,7 @@ export const Model = (model) => {
   schema = {
     ...schema,
     components: {
+      ...(schema.components && schema.components),
       schemas: {
         ...(schema.components && schema.components.schemas),
         ...model,
