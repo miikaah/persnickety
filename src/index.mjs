@@ -1,3 +1,5 @@
+import { validateRequest } from "./validator.mjs";
+
 let schema;
 
 const Persnickety = (schemaSkeleton) => {
@@ -5,6 +7,12 @@ const Persnickety = (schemaSkeleton) => {
 
   return {
     getSchema: () => schema,
+    requestValidator: (options) => (req, res, next) => {
+      options.callback(
+        req,
+        validateRequest(schema, req, next, options.ajvOptions)
+      );
+    },
   };
 };
 
