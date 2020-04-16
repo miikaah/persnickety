@@ -69,7 +69,7 @@ const resolveRef = (schema, refParts) => {
   return resolveRef(newSchema, newRefParts);
 };
 
-export const getParams = (schema, routeKey, method, type) => {
+export const getSchema = (schema, routeKey, method, type) => {
   const params = schema.paths[routeKey][method.toLowerCase()].parameters;
   const refs = params.filter((p) => Object.keys(p).includes("$ref"));
 
@@ -86,15 +86,15 @@ export const getParams = (schema, routeKey, method, type) => {
   return result.filter(isValidParam).reduce(toObject, {});
 };
 
-export const getPathParams = (schema, routeKey, method) => {
-  return getParams(schema, routeKey, method, "path");
+export const getPathSchema = (schema, routeKey, method) => {
+  return getSchema(schema, routeKey, method, "path");
 };
 
-export const getQueryParams = (schema, routeKey, method) => {
-  return getParams(schema, routeKey, method, "query");
+export const getQuerySchema = (schema, routeKey, method) => {
+  return getSchema(schema, routeKey, method, "query");
 };
 
-export const getBodyParams = (schema, routeKey, method) => {
+export const getBodySchema = (schema, routeKey, method) => {
   const routeBody = schema.paths[routeKey][method.toLowerCase()].requestBody;
   const bodySchema = routeBody.content["application/json"].schema;
   const isRef = Object.keys(bodySchema).includes("$ref");
