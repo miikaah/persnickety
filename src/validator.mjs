@@ -62,7 +62,8 @@ export const validateRequest = (schema, req, next, options = {}) => {
   }
 
   // Validate body parameters
-  const routeBody = schema.paths && schema.paths[routeKey][method.toLowerCase()].requestBody;
+  const path = schema.paths?.[routeKey]
+  const routeBody = path && path.[method.toLowerCase()].requestBody;
 
   if (typeof routeBody === "object") {
     const msgPrefix = "Persnickety[Body params validation failed]:";
