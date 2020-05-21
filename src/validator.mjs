@@ -12,7 +12,7 @@ import {
 export const validateRequest = (schema, req, next, options = {}) => {
   const { url, query } = stripQueryFromUrl(req.originalUrl);
   const method = req.method;
-  const routes = Object.keys(schema.paths);
+  const routes = Object.keys(schema.paths || {});
   const { routeKey, params } = getRouteKeyAndParams(url, method, routes);
 
   const validate = (schemaGetter, paramsToValidate) => {
