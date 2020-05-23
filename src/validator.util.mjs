@@ -99,7 +99,7 @@ export const getBodySchema = (schema, routeKey, method) => {
   const bodySchema = routeBody.content["application/json"].schema;
   const isRef = Object.keys(bodySchema).includes("$ref");
 
-  if (!isRef) return bodySchema;
+  if (!isRef) return bodySchema.properties;
 
   return resolveRef(schema, bodySchema["$ref"].split("/").slice(1)).properties;
 };
