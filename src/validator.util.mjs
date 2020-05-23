@@ -27,21 +27,38 @@ export const getRouteKeyAndParams = (url, method, routes) => {
   const urlParts = url.split("/");
   const urlLength = urlParts.length - (hasTrailingSlash ? 1 : 0);
   const urlRoot = `${method}/${urlParts[1]}`;
-  const routeKey = routes.find((route) => {
+
+  // Try for an exact match
+  let routeKey = routes.find((route) => {
     const routeParts = route.split("/");
     return (
       `${method}${route}`.startsWith(urlRoot) &&
       routeParts.length === urlLength &&
-      routeParts.every((routePart, index) => {
-        const urlPart = urlParts[index];
-        return (
-          urlPart === routePart || urlPart === "" || routePart.includes("{")
-        );
-      })
+      url === route
     );
   });
 
-  if (!routeKey) return {};
+  // Route might have path params. Do another lookup.
+  // This might return a wrong routeKey if there are route clashes.
+  // This is considered a user error for now.
+  if (!routeKey) {
+    routeKey = routes.find((route) => {
+      const routeParts = route.split("/");
+      return (
+        `${method}${route}`.startsWith(urlRoot) &&
+        routeParts.length === urlLength &&
+        routeParts.every((routePart, index) => {
+          const urlPart = urlParts[index];
+          return (
+            urlPart === routePart || urlPart === "" || routePart.includes("{")
+          );
+        })
+      );
+    });
+  }
+
+  // Validation won't run after this
+  if (!routeKey) return {}
 
   const paramIndexes = [];
   const paramNames = routeKey
@@ -70,7 +87,13 @@ const resolveRef = (schema, refParts) => {
 };
 
 export const getSchema = (schema, routeKey, method, type) => {
-  const params = schema.paths[routeKey][method.toLowerCase()].parameters;
+  const pathSchema = schema.paths[routeKey][method.toLowerCase()]
+
+  // This can happen when route has multiple parts
+  // e.g. /foo/foo
+  if (!pathSchema) return;
+
+  const params = pathSchema.parameters;
   const refs = params.filter((p) => Object.keys(p).includes("$ref"));
 
   const isValidParam = (param) => param.in === type;
