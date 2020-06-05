@@ -7,20 +7,22 @@ let startsWithWhitelist;
 const Persnickety = (schemaSkeleton, requestWhitelist) => {
   schema = schemaSkeleton;
   whitelist = requestWhitelist;
-  startsWithWhitelist = requestWhitelist
-    .filter(route => route.endsWith('/*'))
-    .map(route => route.replace('/*', ''));
+  startsWithWhitelist =
+    requestWhitelist &&
+    requestWhitelist
+      .filter((route) => route.endsWith("/*"))
+      .map((route) => route.replace("/*", ""));
 
   return {
     getSchema: () => schema,
     requestValidator: (options) => (req, res, next) => {
-      const url = req.originalUrl
+      const url = req.originalUrl;
       if (whitelist) {
         if (whitelist.includes(url)) {
           next();
           return;
         }
-        if (startsWithWhitelist.some(route => url.startsWith(route))) {
+        if (startsWithWhitelist.some((route) => url.startsWith(route))) {
           next();
           return;
         }
