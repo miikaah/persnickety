@@ -192,7 +192,7 @@ The options are passed to Ajv during validation. There are 3 types of validation
 
 #### callback
 
-The callback is called if the validation fails. You can use it to handle the request further. The result contains the Ajv validation error and input parameters.
+The callback is called after validation has been done. You can use it to handle the request further. The result contains the Ajv validation error and input parameters if there was an error.
 
 ```
 {
