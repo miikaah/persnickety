@@ -55,7 +55,7 @@ const persnickety = Persnickety(schema, ["/api-docs/*", "/docs"]);
 
 ## Model schema generator
 
-The Model function takes in an OSA3 Data Model aka Schema. See: https://swagger.io/docs/specification/data-models/. Multiple Model schemas can be passed in at the same time.
+The Model function takes in an OAS3 Data Model aka Schema. See: https://swagger.io/docs/specification/data-models/. Multiple Model schemas can be passed in at the same time.
 
 ```
 import { Model } from "persnickety";
