@@ -7,6 +7,6 @@ It currently contains:
 - A generator for path and model specifications
 - A request validator for path, query and body parameters (Express middleware)
 
-### Why?
+TODO:
 
-Swagger is super useful, but it lacks the necessary tools to make its use easier and more context specific when it comes to Express routes.
+- Proper path and query param validation
