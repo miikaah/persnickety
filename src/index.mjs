@@ -16,14 +16,18 @@ const defaultAjvOptions = {
   },
 };
 
-const Persnickety = (schemaSkeleton, requestWhitelist) => {
+const Persnickety = (schemaSkeleton, requestWhitelist = []) => {
+  if (typeof schemaSkeleton !== "object" || Array.isArray(schemaSkeleton)) {
+    throw new Error(
+      "Persnickety configuration error: schema is a required object"
+    );
+  }
+
   schema = schemaSkeleton;
   whitelist = requestWhitelist;
-  startsWithWhitelist =
-    requestWhitelist &&
-    requestWhitelist
-      .filter((route) => route.endsWith("/*"))
-      .map((route) => route.replace("/*", ""));
+  startsWithWhitelist = requestWhitelist
+    .filter((route) => route.endsWith("/*"))
+    .map((route) => route.replace("/*", ""));
 
   return {
     getSchema: () => schema,

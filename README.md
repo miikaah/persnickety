@@ -21,7 +21,7 @@ import Persnickety from "persnickety";
 const persnickety = Persnickety(schema, requestWhitelist);
 ```
 
-### Schema
+#### schema
 
 A "skeleton" OAS3 schema. For example:
 
@@ -45,7 +45,7 @@ A "skeleton" OAS3 schema. For example:
 
 ```
 
-### Request validator whitelist
+#### requestWhitelist
 
 Allows you to turn off validation for specific routes. Use `/route/*` as wildcard to turn off validation for routes starting with a path.
 
