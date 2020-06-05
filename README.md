@@ -153,7 +153,7 @@ Route("/product/{id}", {
 
 ## Request Validator
 
-The request validator is an Express middleware.
+The request validator is an Express middleware. It uses Ajv to validate the schema https://github.com/ajv-validator/ajv.
 
 ```
 app.use(
