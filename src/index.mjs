@@ -4,6 +4,10 @@ let schema;
 let whitelist;
 let startsWithWhitelist;
 
+const defaultAjvOptions = {
+  coerceTypes: true,
+};
+
 const Persnickety = (schemaSkeleton, requestWhitelist) => {
   schema = schemaSkeleton;
   whitelist = requestWhitelist;
@@ -16,6 +20,11 @@ const Persnickety = (schemaSkeleton, requestWhitelist) => {
   return {
     getSchema: () => schema,
     requestValidator: (options) => (req, res, next) => {
+      if (!options) {
+        throw new Error(
+          "Persnickety requestValidator needs and options object"
+        );
+      }
       const url = req.originalUrl;
       if (whitelist) {
         if (whitelist.includes(url)) {
@@ -27,10 +36,11 @@ const Persnickety = (schemaSkeleton, requestWhitelist) => {
           return;
         }
       }
-      options.callback(
-        req,
-        validateRequest(schema, req, next, options.ajvOptions)
-      );
+      const ajvOptions = {
+        ...defaultAjvOptions,
+        ...options.ajvOptions,
+      };
+      options.callback(req, validateRequest(schema, req, next, ajvOptions));
     },
   };
 };
