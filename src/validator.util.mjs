@@ -58,7 +58,7 @@ export const getRouteKeyAndParams = (url, method, routes) => {
   }
 
   // Validation won't run after this
-  if (!routeKey) return {}
+  if (!routeKey) return {};
 
   const paramIndexes = [];
   const paramNames = routeKey
@@ -87,17 +87,19 @@ const resolveRef = (schema, refParts) => {
 };
 
 export const getSchema = (schema, routeKey, method, type) => {
-  const pathSchema = schema.paths[routeKey][method.toLowerCase()]
+  if (!routeKey) return;
+  const pathSchema = schema.paths[routeKey];
+  if (!pathSchema) return;
+  const methodSchema = pathSchema[method.toLowerCase()];
 
   // This can happen when route has multiple parts
   // e.g. /foo/foo
-  if (!pathSchema) return;
+  if (!methodSchema) return;
 
-  const params = pathSchema.parameters;
+  const params = methodSchema.parameters;
   const refs = params.filter((p) => Object.keys(p).includes("$ref"));
 
   const isValidParam = (param) => param.in === type;
-  const toObject = (acc, param) => ({ ...acc, [param.name]: param.schema });
 
   let result = params;
   if (refs.length) {
@@ -106,7 +108,20 @@ export const getSchema = (schema, routeKey, method, type) => {
       ...refs.map((ref) => resolveRef(schema, ref["$ref"].split("/").slice(1))),
     ];
   }
-  return result.filter(isValidParam).reduce(toObject, {});
+  const toObject = (acc, param) => ({
+    ...acc,
+    type: "object",
+    properties: {
+      ...acc.properties,
+      [param.name]: param.schema,
+    },
+    required: [...acc.required, param.required && param.name],
+  });
+  const builtSchema = result
+    .filter(isValidParam)
+    .reduce(toObject, { properties: {}, required: [] });
+  builtSchema.required = builtSchema.required.filter(Boolean);
+  return builtSchema;
 };
 
 export const getPathSchema = (schema, routeKey, method) => {
@@ -122,9 +137,9 @@ export const getBodySchema = (schema, routeKey, method) => {
   const bodySchema = routeBody.content["application/json"].schema;
   const isRef = Object.keys(bodySchema).includes("$ref");
 
-  if (!isRef) return bodySchema.properties;
+  if (!isRef) return bodySchema;
 
-  return resolveRef(schema, bodySchema["$ref"].split("/").slice(1)).properties;
+  return resolveRef(schema, bodySchema["$ref"].split("/").slice(1));
 };
 
 export const formatErrorMessage = (prefix, errors) => {

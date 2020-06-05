@@ -15,18 +15,6 @@ export const validateRequest = (schema, req, next, options = {}) => {
   const routes = Object.keys(schema.paths || {});
   const { routeKey, params } = getRouteKeyAndParams(url, method, routes);
 
-  const validate = (schemaGetter, paramsToValidate) => {
-    const schemaForValidation = {
-      properties: schemaGetter(schema, routeKey, method),
-    };
-    const ajv = new Ajv(options);
-    const validator = ajv.compile(schemaForValidation);
-    return {
-      isValid: validator(paramsToValidate),
-      errors: validator.errors,
-    };
-  };
-
   const formatErrorsAndReturn = (err, propName, msgPrefix) => {
     const errors = err.map((e) => formatErrors(routeKey, method, propName, e));
     next({
@@ -43,7 +31,11 @@ export const validateRequest = (schema, req, next, options = {}) => {
 
   // Validate path parameters
   if (typeof params === "object" && Object.keys(params).length) {
-    const { isValid, errors } = validate(getPathSchema, params);
+    const pathSchema = getPathSchema(schema, routeKey, method);
+    const ajv = new Ajv(options.path);
+    const validator = ajv.compile(pathSchema);
+    const isValid = validator(params);
+    const { errors } = validator;
     const msgPrefix = "Persnickety[Path params validation failed]:";
 
     if (!isValid) {
@@ -52,8 +44,12 @@ export const validateRequest = (schema, req, next, options = {}) => {
   }
 
   // Validate query parameters
-  if (typeof query === "object" && Object.keys(query).length) {
-    const { isValid, errors } = validate(getQuerySchema, query);
+  const querySchema = getQuerySchema(schema, routeKey, method);
+  if (querySchema) {
+    const ajv = new Ajv(options.query);
+    const validator = ajv.compile(querySchema);
+    const isValid = validator(query);
+    const { errors } = validator;
     const msgPrefix = "Persnickety[Query params validation failed]:";
 
     if (!isValid) {
@@ -79,7 +75,11 @@ export const validateRequest = (schema, req, next, options = {}) => {
     }
 
     if (Object.keys(req.body).length) {
-      const { isValid, errors } = validate(getBodySchema, req.body);
+      const bodySchema = getBodySchema(schema, routeKey, method);
+      const ajv = new Ajv(options.body);
+      const validator = ajv.compile(bodySchema);
+      const isValid = validator(req.body);
+      const { errors } = validator;
 
       if (!isValid) {
         return formatErrorsAndReturn(errors, "requestBody", msgPrefix);
