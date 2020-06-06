@@ -97,6 +97,10 @@ export const getSchema = (schema, routeKey, method, type) => {
   if (!methodSchema) return;
 
   const params = methodSchema.parameters;
+
+  // Return undefined if the schema has no parameters
+  if (!params) return;
+
   const refs = params.filter((p) => Object.keys(p).includes("$ref"));
 
   const isValidParam = (param) => param.in === type;
