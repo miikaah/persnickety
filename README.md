@@ -15,7 +15,7 @@ Checkout https://github.com/miikaah/persnickety-express-demo for an in-depth dem
 
 ## Configuration
 
-```
+```ts
 import Persnickety from "persnickety";
 
 const persnickety = Persnickety(schema, requestWhitelist);
@@ -25,7 +25,7 @@ const persnickety = Persnickety(schema, requestWhitelist);
 
 A "skeleton" OAS3 schema. For example:
 
-```
+```ts
 {
   openapi: "3.0.0",
   info: {
@@ -49,7 +49,7 @@ A "skeleton" OAS3 schema. For example:
 
 Allows you to turn off validation for specific routes. Use `/route/*` as wildcard to turn off validation for routes starting with a path.
 
-```
+```ts
 const persnickety = Persnickety(schema, ["/api-docs/*", "/docs"]);
 ```
 
@@ -57,7 +57,7 @@ const persnickety = Persnickety(schema, ["/api-docs/*", "/docs"]);
 
 The Model function takes in an OAS3 Data Model aka Schema. See: https://swagger.io/docs/specification/data-models/. Multiple Model schemas can be passed in at the same time.
 
-```
+```ts
 import { Model } from "persnickety";
 
 Model({
@@ -71,7 +71,7 @@ Model({
         type: "number",
       },
     },
-  }
+  },
 });
 ```
 
@@ -79,7 +79,7 @@ Model({
 
 The Route function takes in a `routeKey` which is the exact route (use `{}` to denote a path parameter) and an OAS3 path schema. See: https://swagger.io/docs/specification/basic-structure/.
 
-```
+```ts
 import { Route } from "persnickety";
 
 Route("/product/{id}", {
@@ -148,17 +148,14 @@ Route("/product/{id}", {
     },
   },
 });
-
 ```
 
 ## Request Validator
 
 The request validator is an Express middleware. It uses Ajv to validate the schema https://github.com/ajv-validator/ajv.
 
-```
-app.use(
-  persnickety.requestValidator(options)
-);
+```ts
+app.use(persnickety.requestValidator(options));
 ```
 
 It logs to console on error.
@@ -171,18 +168,18 @@ Persnickety[Query params validation failed]: optionalQueryParam should be intege
 
 All options are optional.
 
-```
+```ts
 persnickety.requestValidator({
   ajvOptions: {},
   callback: (req, result) => {},
-})
+});
 ```
 
 #### ajvOptions
 
 The options are passed to Ajv during validation. There are 3 types of validation and each has its separate AjvOptions object.
 
-```
+```ts
 {
   path: {},
   query: {},
@@ -194,7 +191,7 @@ The options are passed to Ajv during validation. There are 3 types of validation
 
 The callback is called after validation has been done. You can use it to handle the request further. The result contains the Ajv validation error and input parameters if there was an error.
 
-```
+```ts
 {
   errors: [
     {
@@ -217,7 +214,7 @@ The Ajv coerceTypes is true for path and query parameters because these are pars
 and thus are all strings. This in essence turns off validation of properties of type string
 because any input type cast to string just works.
 
-```
+```ts
 {
   path: {
     coerceTypes: true,
