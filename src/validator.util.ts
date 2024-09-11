@@ -1,4 +1,7 @@
-const getQueryAsObject = (queryString) => {
+import Ajv from "ajv";
+import { SchemaSkeleton } from "./types";
+
+const getQueryAsObject = (queryString: string) => {
   const queryParts = queryString.split("&");
   return queryParts
     .map((param) => {
@@ -8,7 +11,7 @@ const getQueryAsObject = (queryString) => {
     .reduce((param, acc) => ({ ...acc, ...param }));
 };
 
-export const stripQueryFromUrl = (url) => {
+export const stripQueryFromUrl = (url: string) => {
   if (!url.includes("?")) {
     return {
       url,
@@ -22,7 +25,7 @@ export const stripQueryFromUrl = (url) => {
   };
 };
 
-export const getRouteKeyAndParams = (url, method, routes) => {
+export const getRouteKeyAndParams = (url: string, method: string, routes: string[]) => {
   const hasTrailingSlash = url.endsWith("/");
   const urlParts = url.split("/");
   const urlLength = urlParts.length - (hasTrailingSlash ? 1 : 0);
@@ -49,9 +52,7 @@ export const getRouteKeyAndParams = (url, method, routes) => {
         routeParts.length === urlLength &&
         routeParts.every((routePart, index) => {
           const urlPart = urlParts[index];
-          return (
-            urlPart === routePart || urlPart === "" || routePart.includes("{")
-          );
+          return urlPart === routePart || urlPart === "" || routePart.includes("{");
         })
       );
     });
@@ -60,7 +61,7 @@ export const getRouteKeyAndParams = (url, method, routes) => {
   // Validation won't run after this
   if (!routeKey) return {};
 
-  const paramIndexes = [];
+  const paramIndexes: number[] = [];
   const paramNames = routeKey
     .split("/")
     .filter((part, index) => {
@@ -77,8 +78,8 @@ export const getRouteKeyAndParams = (url, method, routes) => {
   return { routeKey, params };
 };
 
-const resolveRef = (schema, refParts) => {
-  const newSchema = schema[refParts[0]];
+const resolveRef = (schema: SchemaSkeleton, refParts: string[]) => {
+  const newSchema = schema[refParts[0]] as SchemaSkeleton;
   const newRefParts = refParts.slice(1);
 
   if (newRefParts.length < 1) return newSchema;
@@ -86,7 +87,12 @@ const resolveRef = (schema, refParts) => {
   return resolveRef(newSchema, newRefParts);
 };
 
-export const getSchema = (schema, routeKey, method, type) => {
+export const getSchema = (
+  schema: SchemaSkeleton,
+  routeKey: string,
+  method: string,
+  type: string,
+) => {
   if (!routeKey) return;
   const pathSchema = schema.paths[routeKey];
   if (!pathSchema) return;
@@ -103,16 +109,19 @@ export const getSchema = (schema, routeKey, method, type) => {
 
   const refs = params.filter((p) => Object.keys(p).includes("$ref"));
 
-  const isValidParam = (param) => param.in === type;
+  const isValidParam = (param: { in: string }) => param.in === type;
 
-  let result = params;
+  let result: any = params;
   if (refs.length) {
     result = [
       ...params.filter((p) => !Object.keys(p).includes("$ref")),
       ...refs.map((ref) => resolveRef(schema, ref["$ref"].split("/").slice(1))),
-    ];
+    ] as any;
   }
-  const toObject = (acc, param) => ({
+  const toObject = (
+    acc: { properties: any; required: any[] },
+    param: { name: string; schema: any; required: boolean },
+  ) => ({
     ...acc,
     type: "object",
     properties: {
@@ -123,20 +132,35 @@ export const getSchema = (schema, routeKey, method, type) => {
   });
   const builtSchema = result
     .filter(isValidParam)
-    .reduce(toObject, { properties: {}, required: [] });
+    .reduce(toObject, { properties: {}, required: [] }) as unknown as {
+    properties: any;
+    required: any[];
+  };
   builtSchema.required = builtSchema.required.filter(Boolean);
   return builtSchema;
 };
 
-export const getPathSchema = (schema, routeKey, method) => {
+export const getPathSchema = (
+  schema: SchemaSkeleton,
+  routeKey: string,
+  method: string,
+) => {
   return getSchema(schema, routeKey, method, "path");
 };
 
-export const getQuerySchema = (schema, routeKey, method) => {
+export const getQuerySchema = (
+  schema: SchemaSkeleton,
+  routeKey: string,
+  method: string,
+) => {
   return getSchema(schema, routeKey, method, "query");
 };
 
-export const getBodySchema = (schema, routeKey, method) => {
+export const getBodySchema = (
+  schema: SchemaSkeleton,
+  routeKey: string,
+  method: string,
+) => {
   const routeBody = schema.paths[routeKey][method.toLowerCase()].requestBody;
   const bodySchema = routeBody.content["application/json"].schema;
   const isRef = Object.keys(bodySchema).includes("$ref");
@@ -146,15 +170,21 @@ export const getBodySchema = (schema, routeKey, method) => {
   return resolveRef(schema, bodySchema["$ref"].split("/").slice(1));
 };
 
-export const formatErrorMessage = (prefix, errors) => {
-  return `${prefix} ${errors
-    .map((e) => `${e.dataPath.replace(".", "")} ${e.message}`)
-    .join(", ")}`;
+export const formatErrorMessage = (
+  prefix: string,
+  errors: Ajv.ErrorObject[] | undefined,
+) => {
+  return `${prefix} ${
+    errors?.map((e) => `${e.dataPath.replace(".", "")} ${e.message}`).join(", ") ?? ""
+  }`;
 };
 
-export const formatErrors = (routeKey, method, propName, e) => ({
+export const formatErrors = (
+  routeKey: string,
+  method: string,
+  propName: string,
+  e: Ajv.ErrorObject,
+) => ({
   ...e,
-  schemaPath: `#/paths${routeKey}/${method.toLowerCase()}/${propName}/${
-    e.dataPath
-  }`,
+  schemaPath: `#/paths${routeKey}/${method.toLowerCase()}/${propName}/${e.dataPath}`,
 });
