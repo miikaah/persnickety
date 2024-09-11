@@ -8,8 +8,8 @@ import {
 } from "./types";
 
 let schema: SchemaSkeleton;
-let whitelist: string[];
-let startsWithWhitelist: string[];
+let allowlist: string[];
+let startsWithAllowlist: string[];
 
 const defaultAjvOptions = {
   path: {
@@ -24,14 +24,14 @@ const defaultAjvOptions = {
   callback: undefined,
 };
 
-const Persnickety = (schemaSkeleton: SchemaSkeleton, requestWhitelist: string[] = []) => {
+const Persnickety = (schemaSkeleton: SchemaSkeleton, requestAllowlist: string[] = []) => {
   if (typeof schemaSkeleton !== "object" || Array.isArray(schemaSkeleton)) {
     throw new Error("Persnickety configuration error: schema is a required object");
   }
 
   schema = schemaSkeleton;
-  whitelist = requestWhitelist;
-  startsWithWhitelist = requestWhitelist
+  allowlist = requestAllowlist;
+  startsWithAllowlist = requestAllowlist
     .filter((route) => route.endsWith("/*"))
     .map((route) => route.replace("/*", ""));
 
@@ -46,12 +46,12 @@ const Persnickety = (schemaSkeleton: SchemaSkeleton, requestWhitelist: string[] 
           );
         }
         const url = req.originalUrl;
-        if (whitelist) {
-          if (whitelist.includes(url)) {
+        if (allowlist) {
+          if (allowlist.includes(url)) {
             next();
             return;
           }
-          if (startsWithWhitelist.some((route) => url.startsWith(route))) {
+          if (startsWithAllowlist.some((route) => url.startsWith(route))) {
             next();
             return;
           }

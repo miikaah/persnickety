@@ -18,7 +18,7 @@ Checkout https://github.com/miikaah/persnickety-express-demo for an in-depth dem
 ```ts
 import Persnickety from "persnickety";
 
-const persnickety = Persnickety(schema, requestWhitelist);
+const persnickety = Persnickety(schema, requestAllowlist);
 ```
 
 #### schema
@@ -45,7 +45,7 @@ A "skeleton" OAS3 schema. For example:
 
 ```
 
-#### requestWhitelist
+#### requestAllowlist
 
 Allows you to turn off validation for specific routes. Use `/route/*` as wildcard to turn off validation for routes starting with a path.
 
